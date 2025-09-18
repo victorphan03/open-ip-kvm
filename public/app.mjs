@@ -22,7 +22,8 @@ new Vue({
     async init() {
       try {
         const config = await this.fetchConfig();
-        document.title = config.app_title;
+        
+        document.title = config.app_title? config.app_title : 'Open IP-KVM';
 
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
         if (!streamOk) {
@@ -50,10 +51,24 @@ new Vue({
       }
     },
     async fetchConfig() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+        return null;
+      }
       try {
-        const res = await fetch('/api/config');
-        return res.json();
+          const res = await fetch('/api/config', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          if (res.status === 401) {
+            window.location.href = '/login';
+            return null;
+          }
+          return res.json();
       } catch (e) {
+        window.location.href = '/login';
         return null;
       }
     },

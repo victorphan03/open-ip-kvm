@@ -56,6 +56,11 @@
             class="button bi-question-circle"
             title="Help"
           ></span>
+          <span
+            @click="setDialog('help')"
+            class="button bi-question-circle"
+            title="Help"
+          ></span>
         </div>
 
         <div v-show="activeDialog === 'help'" class="dialog trans-bg">

@@ -3,9 +3,11 @@
   "listen_port": 8000,
   "serialport": "/dev/ttyUSB0",
   "mjpg_streamer": {
-    "device": "/dev/video0",
+    "device": "/dev/video-macrosilicon",
     "res": "1920x1080",
     "fps": 30,
     "stream_port": 8010
-  }
+  },
+  "username": "x79",
+  "password_hash": "$2b$10$/MwCqh56A17fuzRSgxZV0.mdn51JuiYXVLA/dYAqMPIkHRqXB/p8."
 }
