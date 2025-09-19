@@ -24,27 +24,31 @@ new Vue({
         const config = await this.fetchConfig();
         
         document.title = config.app_title? config.app_title : 'Open IP-KVM';
-
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
         if (!streamOk) {
           throw new Error(
             'Video stream is not ready, please check mjpeg process'
           );
         }
-        this.$channel = await ws.init(
-          `ws://${this.serviceHost}:${config.listen_port}/websocket`
-        );
+        
+        // Auto-detect WebSocket protocol and port based on current page
+        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsPort = location.protocol === 'https:' ? '' : `:${config.listen_port}`;
+        const wsUrl = `${wsProtocol}//${this.serviceHost}${wsPort}/websocket`;
+        
+        console.log('WebSocket URL:', wsUrl);
+        this.$channel = await ws.init(wsUrl);
         this.bindKeyHandler();
         this.bindMouseHandler();
 
-        this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+        this.streamSrc = `/api/stream`;
       } catch (e) {
         alert(e.toString());
       }
     },
     async pingStream(port) {
       try {
-        const pingRes = await fetch(`http://${this.serviceHost}:${port}/?action=snapshot`);
+        const pingRes = await fetch(`/api/snapshot`);
         return pingRes.status === 200;
       } catch (e) {
         return false;
@@ -180,6 +184,12 @@ new Vue({
     doRemotePaste() {
       kb.sendSequence(this.$channel, this.pasteContent);
       this.pasteContent = '';
+    },
+    doLogout() {
+      // Xóa token khỏi localStorage
+      localStorage.removeItem('token');
+      // Chuyển hướng về trang login
+      window.location.href = '/login.html';
     },
     setDialog(name) {
       if (name) {

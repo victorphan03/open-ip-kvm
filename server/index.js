@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const bodyParser = require('koa-bodyparser');
 const jwt = require('jsonwebtoken');
 const koaBody = require('koa-body');
+const http = require('http');
 const SECRET_KEY = 'f09a4b4314e022393e9676e26e7e7ba5808a115ebdf323290ff0c7ec0e834d78'; // Đổi thành chuỗi bí mật của bạn
 
 config.app_title = config.app_title || 'Open IP-KVM';
@@ -108,6 +109,40 @@ async function start() {
     app.use(async function router(ctx) {
       if (ctx.path === '/api/config') {
         ctx.body = config;
+      } else if (ctx.path === '/api/stream') {
+        // Proxy stream từ mjpg-streamer
+        const streamUrl = `http://127.0.0.1:${config.mjpg_streamer.stream_port}/?action=stream`;
+        
+        return new Promise((resolve) => {
+          const req = http.get(streamUrl, (res) => {
+            ctx.set(res.headers);
+            ctx.body = res;
+            resolve();
+          });
+          
+          req.on('error', (err) => {
+            ctx.status = 500;
+            ctx.body = 'Stream not available';
+            resolve();
+          });
+        });
+      } else if (ctx.path === '/api/snapshot') {
+        // Proxy snapshot từ mjpg-streamer
+        const snapshotUrl = `http://127.0.0.1:${config.mjpg_streamer.stream_port}/?action=snapshot`;
+        
+        return new Promise((resolve) => {
+          const req = http.get(snapshotUrl, (res) => {
+            ctx.set(res.headers);
+            ctx.body = res;
+            resolve();
+          });
+          
+          req.on('error', (err) => {
+            ctx.status = 500;
+            ctx.body = 'Snapshot not available';
+            resolve();
+          });
+        });
       }
     });
 
