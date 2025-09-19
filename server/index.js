@@ -23,16 +23,47 @@ const { startMJPGStreamer } = require('./mjpg-streamer.js');
 async function start() {
 
   try {
-    const writeSerial = startSerial(config.serialport);
+    let allWebSockets = new Set();
+    
+    // LED status callback to broadcast to all connected clients
+    function broadcastLedStatus(ledData) {
+      const message = JSON.stringify({
+        type: 'led_status',
+        payload: ledData
+      });
+      
+      allWebSockets.forEach(ws => {
+        if (ws.readyState === 1) { // WebSocket.OPEN = 1
+          ws.send(message);
+        }
+      });
+    }
+
+    const serialFunctions = startSerial(config.serialport, broadcastLedStatus);
     await startMJPGStreamer(config.mjpg_streamer);
 
     function websocketHandler(ws) {
       console.log('new websocket connection');
+      allWebSockets.add(ws);
+      
+      ws.on('close', () => {
+        allWebSockets.delete(ws);
+      });
+      
       ws.on('message', function message(data) {
         const msg = JSON.parse(data.toString());
         switch (msg.type) {
           case 'write_serial':
-            writeSerial(msg.payload);
+            serialFunctions.writeSerial(msg.payload);
+            break;
+          case 'power_button':
+            serialFunctions.sendPowerButton();
+            break;
+          case 'reset_button':
+            serialFunctions.sendResetButton();
+            break;
+          case 'request_led_status':
+            serialFunctions.requestLedStatus();
             break;
         }
       });

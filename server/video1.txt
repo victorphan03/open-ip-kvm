@@ -1,0 +1,47 @@
+P: /devices/platform/soc/d0078080.usb/c9000000.usb/xhci-hcd.1.auto/usb1/1-2/1-2:1.0/video4linux/video1
+M: video1
+R: 1
+U: video4linux
+D: c 81:1
+N: video1
+L: 0
+S: v4l/by-id/usb-MACROSILICON_2109-video-index0
+S: v4l/by-path/platform-xhci-hcd.1.auto-usb-0:2:1.0-video-index0
+E: DEVPATH=/devices/platform/soc/d0078080.usb/c9000000.usb/xhci-hcd.1.auto/usb1/1-2/1-2:1.0/video4linux/video1
+E: DEVNAME=/dev/video1
+E: MAJOR=81
+E: MINOR=1
+E: SUBSYSTEM=video4linux
+E: USEC_INITIALIZED=2995096425
+E: ID_V4L_VERSION=2
+E: ID_V4L_PRODUCT=UVC Camera (345f:2109): USB Vid
+E: ID_V4L_CAPABILITIES=:capture:
+E: ID_BUS=usb
+E: ID_MODEL=2109
+E: ID_MODEL_ENC=2109
+E: ID_MODEL_ID=2109
+E: ID_SERIAL=MACROSILICON_2109
+E: ID_VENDOR=MACROSILICON
+E: ID_VENDOR_ENC=MACROSILICON
+E: ID_VENDOR_ID=345f
+E: ID_REVISION=2100
+E: ID_TYPE=video
+E: ID_USB_MODEL=2109
+E: ID_USB_MODEL_ENC=2109
+E: ID_USB_MODEL_ID=2109
+E: ID_USB_SERIAL=MACROSILICON_2109
+E: ID_USB_VENDOR=MACROSILICON
+E: ID_USB_VENDOR_ENC=MACROSILICON
+E: ID_USB_VENDOR_ID=345f
+E: ID_USB_REVISION=2100
+E: ID_USB_TYPE=video
+E: ID_USB_INTERFACES=:0e0100:0e0200:010100:010200:030000:
+E: ID_USB_INTERFACE_NUM=00
+E: ID_USB_DRIVER=uvcvideo
+E: ID_PATH=platform-xhci-hcd.1.auto-usb-0:2:1.0
+E: ID_PATH_TAG=platform-xhci-hcd_1_auto-usb-0_2_1_0
+E: ID_FOR_SEAT=video4linux-platform-xhci-hcd_1_auto-usb-0_2_1_0
+E: DEVLINKS=/dev/v4l/by-id/usb-MACROSILICON_2109-video-index0 /dev/v4l/by-path/platform-xhci-hcd.1.auto-usb-0:2:1.0-video-index0
+E: TAGS=:seat:uaccess:
+E: CURRENT_TAGS=:seat:uaccess:
+

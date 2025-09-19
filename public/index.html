@@ -35,6 +35,25 @@
         <div class="float-zone trans-bg">
           <!-- <div>Open IP-KVM</div> -->
           <span
+            @click="sendPowerButton"
+            class="button bi-power"
+            style="font-size: 22px"
+            :class="{
+              'power-on': ledStatus.power,
+              'power-off': !ledStatus.power
+            }"
+            title="Power Button"
+          ></span>
+          <span
+            @click="sendResetButton"
+            class="button bi-arrow-clockwise"
+            style="font-size: 22px"
+            :class="{
+              'hdd-active': ledStatus.hdd
+            }"
+            title="Reset Button"
+          ></span>
+          <span
             class="indicator bi-mouse"
             style="font-size: 22px"
             :class="{active: isPointorLocked}"

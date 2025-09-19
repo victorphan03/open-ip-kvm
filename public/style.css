@@ -119,3 +119,42 @@ body, html {
   text-align: center;
   padding-top: 45vh;
 }
+
+/* LED Status Indicators */
+.power-on {
+  color: #ff4444 !important;
+  text-shadow: 0 0 8px #ff4444;
+  animation: pulse-red 2s infinite;
+}
+
+.power-off {
+  color: #666 !important;
+}
+
+.hdd-active {
+  color: #44ff44 !important;
+  text-shadow: 0 0 8px #44ff44;
+  animation: pulse-green 1s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { 
+    opacity: 1;
+    text-shadow: 0 0 8px #ff4444;
+  }
+  50% { 
+    opacity: 0.7;
+    text-shadow: 0 0 4px #ff4444;
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% { 
+    opacity: 1;
+    text-shadow: 0 0 8px #44ff44;
+  }
+  50% { 
+    opacity: 0.7;
+    text-shadow: 0 0 4px #44ff44;
+  }
+}

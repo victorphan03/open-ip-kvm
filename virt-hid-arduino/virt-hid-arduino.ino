@@ -4,7 +4,14 @@
 #define KB_EVT_START 248
 #define MOUSE_EVT_START 249
 #define KEY_SEQUENCE_EVT_START 250
+#define POWER_EVT_START 252
 #define EVT_END 251
+
+// Pin definitions for power control
+#define PIN_POWER_BUTTON 2    // Controls power button via transistor
+#define PIN_RESET_BUTTON 3    // Controls reset button via transistor  
+#define PIN_POWER_LED 4       // Reads power LED status
+#define PIN_HDD_LED 5         // Reads HDD LED status
 
 #define KB_EVT_TYPE_KEYDOWN 1
 #define KB_EVT_TYPE_KEYUP 2
@@ -21,6 +28,10 @@
 #define MOUSE_EVT_TYPE_RESET 9
 #define MOUSE_EVT_TYPE_CONFIG_MOVE_FACTOR 10
 
+#define POWER_EVT_TYPE_POWER_BUTTON 1
+#define POWER_EVT_TYPE_RESET_BUTTON 2
+#define POWER_EVT_TYPE_READ_STATUS 3
+
 #define R_BUF_LEN 32
 
 bool led = false;
@@ -29,13 +40,59 @@ int rBuf[R_BUF_LEN];
 int rBufCursor = 0;
 int mouseMoveFactor = 1;
 
+// Power control variables
+bool lastPowerLedState = false;
+bool lastHddLedState = false;
+unsigned long lastLedReadTime = 0;
+#define LED_READ_INTERVAL 500  // Read LED status every 500ms
+
 void blink() {
   digitalWrite(LED_BUILTIN, led ? HIGH : LOW);
   led = !led;
 }
+
+// Power control functions
+void pressPowerButton() {
+  digitalWrite(PIN_POWER_BUTTON, HIGH);  // Activate transistor
+  delay(150);                           // Hold for 150ms
+  digitalWrite(PIN_POWER_BUTTON, LOW);   // Deactivate transistor
+}
+
+void pressResetButton() {
+  digitalWrite(PIN_RESET_BUTTON, HIGH);  // Activate transistor
+  delay(100);                           // Hold for 100ms
+  digitalWrite(PIN_RESET_BUTTON, LOW);   // Deactivate transistor
+}
+
+void sendLedStatus() {
+  bool powerLed = digitalRead(PIN_POWER_LED);
+  bool hddLed = digitalRead(PIN_HDD_LED);
+  
+  // Send power LED status
+  Serial1.write(253);  // LED status start marker
+  Serial1.write(1);    // Power LED type
+  Serial1.write(powerLed ? 1 : 0);
+  Serial1.write(EVT_END);
+  
+  // Send HDD LED status
+  Serial1.write(253);  // LED status start marker
+  Serial1.write(2);    // HDD LED type
+  Serial1.write(hddLed ? 1 : 0);
+  Serial1.write(EVT_END);
+}
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
+
+  // Initialize power control pins
+  pinMode(PIN_POWER_BUTTON, OUTPUT);
+  pinMode(PIN_RESET_BUTTON, OUTPUT);
+  pinMode(PIN_POWER_LED, INPUT);
+  pinMode(PIN_HDD_LED, INPUT);
+  
+  // Set default states - LOW means transistor is OFF (not pressing buttons)
+  digitalWrite(PIN_POWER_BUTTON, LOW);
+  digitalWrite(PIN_RESET_BUTTON, LOW);
 
   Keyboard.begin();
   Mouse.begin();
@@ -100,6 +157,20 @@ void parse_r_buf() {
           Keyboard.write(rBuf[i]);
       }
   }
+
+  if (rBuf[0] == POWER_EVT_START && rBufCursor == 2) {
+    switch (rBuf[1]) {
+       case POWER_EVT_TYPE_POWER_BUTTON:
+        pressPowerButton();
+        break;
+       case POWER_EVT_TYPE_RESET_BUTTON:
+        pressResetButton();
+        break;
+       case POWER_EVT_TYPE_READ_STATUS:
+        sendLedStatus();
+        break;
+    }
+  }
 }
 
 void reset_r_buf() {
@@ -118,7 +189,7 @@ void loop() {
       reset_r_buf();
     } else {
       if (rBufCursor == 0) {
-        if (curVal == KB_EVT_START || curVal == MOUSE_EVT_START || curVal == KEY_SEQUENCE_EVT_START) {
+        if (curVal == KB_EVT_START || curVal == MOUSE_EVT_START || curVal == KEY_SEQUENCE_EVT_START || curVal == POWER_EVT_START) {
           rBuf[rBufCursor] = curVal;
           rBufCursor += 1;
         }
@@ -128,9 +199,25 @@ void loop() {
            rBufCursor += 1;
         } else {
           // overflow, reset rBuf
-          rBuf[0] = 0;
+          reset_r_buf();
         }
       }
     }
+  }
+  
+  // Read LED status periodically and send if changed
+  unsigned long currentTime = millis();
+  if (currentTime - lastLedReadTime >= LED_READ_INTERVAL) {
+    bool currentPowerLed = digitalRead(PIN_POWER_LED);
+    bool currentHddLed = digitalRead(PIN_HDD_LED);
+    
+    // Send status if changed
+    if (currentPowerLed != lastPowerLedState || currentHddLed != lastHddLedState) {
+      sendLedStatus();
+      lastPowerLedState = currentPowerLed;
+      lastHddLedState = currentHddLed;
+    }
+    
+    lastLedReadTime = currentTime;
   }
 }
