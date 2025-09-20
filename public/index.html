@@ -56,6 +56,14 @@
             class="button bi-question-circle"
             title="Help"
           ></span>
+<<<<<<< HEAD
+=======
+          <span
+            @click="setDialog('Logout')"
+            class="button bi-box-arrow-right"
+            title="Logout"
+          ></span>
+>>>>>>> new-feature
         </div>
 
         <div v-show="activeDialog === 'help'" class="dialog trans-bg">
@@ -97,6 +105,17 @@
           <div class="dialog-footer">
             <button class="dialog-btn" @click="setDialog(), doRemotePaste()">
               Paste
+            </button>
+            <button class="dialog-btn" @click="setDialog()">Cancel</button>
+          </div>
+        </div>
+
+        <div v-show="activeDialog === 'Logout'" class="dialog trans-bg">
+          <div class="dialog-header">Logout</div>
+          <p>Are you sure you want to logout?</p>
+          <div class="dialog-footer">
+            <button class="dialog-btn" @click="doLogout()">
+              Yes
             </button>
             <button class="dialog-btn" @click="setDialog()">Cancel</button>
           </div>
