@@ -128,6 +128,17 @@
 
     <script type="module" src="./app.mjs"></script>
 
+    <script>
+    function doLogout() {
+      window.location.href = '/logout';
+      // Xóa cookie token ở nhiều path khác nhau
+      var paths = ['/', '/public', location.pathname];
+      for (var i = 0; i < paths.length; i++) {
+        document.cookie = 'token=; path=' + paths[i] + '; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0';
+      }
+    }
+    </script>
+
     <script nomodule>
       alert('Opps, no es module support');
     </script>
