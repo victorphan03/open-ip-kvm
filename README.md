@@ -148,3 +148,7 @@ service:
 sudo systemctl daemon-reload
 sudo systemctl enable open-ip-kvm
 sudo systemctl start open-ip-kvm
+
+ls -l /dev/v4l/by-id/
+
+ls -l /dev/serial/by-id/
