@@ -10,7 +10,11 @@
   "author": "Nihiue",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "koa": "^2.13.4",
+    "koa-body": "^6.0.1",
+    "koa-bodyparser": "^4.4.1",
     "koa-static": "^5.0.0",
     "serialport": "^10.4.0",
     "ws": "^8.10.0"

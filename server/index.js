@@ -2,15 +2,12 @@ const path = require('path');
 const url = require('url');
 
 const config = require("./config.json");
-<<<<<<< HEAD
-=======
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const bodyParser = require('koa-bodyparser');
 const jwt = require('jsonwebtoken');
 const koaBody = require('koa-body');
 const http = require('http');
 const SECRET_KEY = 'f09a4b4314e022393e9676e26e7e7ba5808a115ebdf323290ff0c7ec0e834d78'; // Đổi thành chuỗi bí mật của bạn
->>>>>>> new-feature
 
 config.app_title = config.app_title || 'Open IP-KVM';
 config.mjpg_streamer.stream_port = config.mjpg_streamer.stream_port || 8010;

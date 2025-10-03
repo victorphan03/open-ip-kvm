@@ -22,13 +22,7 @@ new Vue({
     async init() {
       try {
         const config = await this.fetchConfig();
-<<<<<<< HEAD
-        document.title = config.app_title;
-
-=======
-        
         document.title = config.app_title? config.app_title : 'Open IP-KVM';
->>>>>>> new-feature
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
         if (!streamOk) {
           throw new Error(
