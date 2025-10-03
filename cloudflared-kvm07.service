@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudflare Tunnel kvm07
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cloudflared tunnel run kvm07
+Restart=always
+User=root
+WorkingDirectory=/root
+
+[Install]
+WantedBy=multi-user.target
