@@ -140,3 +140,11 @@ MIT
 
 For production environment, use [Pi-KVM](https://pikvm.org/)
 
+service:
+
+/etc/systemd/system/open-ip-kvm.service
+
+->
+sudo systemctl daemon-reload
+sudo systemctl enable open-ip-kvm
+sudo systemctl start open-ip-kvm

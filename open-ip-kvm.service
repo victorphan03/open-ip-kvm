@@ -1,0 +1,13 @@
+[Unit]
+Description=Open IP-KVM Node.js Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/open-ip-kvm
+ExecStart=/usr/bin/npm run start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
