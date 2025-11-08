@@ -215,11 +215,16 @@ new Vue({
       try {
         console.log('Loading available devices...');
         const response = await fetch('/api/devices');
+        console.log('Response status:', response.status);
         const devices = await response.json();
         console.log('Available devices:', devices);
+        console.log('Video devices count:', devices.videoDevices ? devices.videoDevices.length : 0);
+        console.log('Serial ports count:', devices.serialPorts ? devices.serialPorts.length : 0);
         
         this.availableDevices.serialPorts = devices.serialPorts || [];
         this.availableDevices.videoDevices = devices.videoDevices || [];
+        
+        console.log('Updated availableDevices:', this.availableDevices);
       } catch (e) {
         console.error('Error loading devices:', e);
       }

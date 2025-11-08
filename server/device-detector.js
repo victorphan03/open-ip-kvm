@@ -40,31 +40,16 @@ function listVideoDevices() {
     });
 
     ffmpeg.on('close', () => {
-      console.log('[Device Detector] ffmpeg output length:', output.length);
       const devices = [];
       const lines = output.split('\n');
-      let inVideoSection = false;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         
-        // Detect video devices section
-        if (line.includes('DirectShow video devices')) {
-          inVideoSection = true;
-          console.log('[Device Detector] Found video devices section');
-          continue;
-        }
-        
-        // Stop when reaching audio section
-        if (line.includes('DirectShow audio devices')) {
-          console.log('[Device Detector] Reached audio section, stopping');
-          break;
-        }
-
-        if (inVideoSection && line.includes('[dshow @')) {
-          // Extract device name
-          const match = line.match(/"([^"]+)"/);
-          if (match && match[1] !== 'dummy') {
+        // Match lines with [dshow @ xxx] "Device Name" (video)
+        if (line.includes('[dshow @') && line.includes('(video)')) {
+          const match = line.match(/"([^"]+)"\s*\(video\)/);
+          if (match) {
             const deviceName = match[1];
             
             // Check if next line has alternative name
