@@ -52,6 +52,11 @@
             title="Remote Paste (ASCII Only)"
           ></span>
           <span
+            @click="setDialog('settings')"
+            class="button bi-gear"
+            title="Settings"
+          ></span>
+          <span
             @click="setDialog('help')"
             class="button bi-question-circle"
             title="Help"
@@ -98,6 +103,68 @@
             <button class="dialog-btn" @click="setDialog(), doRemotePaste()">
               Paste
             </button>
+            <button class="dialog-btn" @click="setDialog()">Cancel</button>
+          </div>
+        </div>
+
+        <div v-show="activeDialog === 'settings'" class="dialog trans-bg" style="width: 500px;">
+          <div class="dialog-header">Settings</div>
+          <div class="settings-content">
+            <div class="setting-item">
+              <label>Serial Port (COM):</label>
+              <select v-model="settingsForm.serialport" v-if="availableDevices.serialPorts.length > 0">
+                <option value="">-- Select Serial Port --</option>
+                <option v-for="port in availableDevices.serialPorts" :key="port.path" :value="port.path">
+                  {{ port.path }} {{ port.manufacturer ? '- ' + port.manufacturer : '' }}
+                </option>
+              </select>
+              <input v-else type="text" v-model="settingsForm.serialport" placeholder="e.g., COM3" />
+              <small v-if="availableDevices.serialPorts.length === 0" style="color: #999;">
+                No serial ports detected. Enter manually or connect device.
+              </small>
+            </div>
+            <div class="setting-item">
+              <label>Camera Device:</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select v-model="settingsForm.device" style="flex: 1;">
+                  <option value="">-- Select Camera --</option>
+                  <option v-for="device in availableDevices.videoDevices" :key="device.name" :value="device.name">
+                    {{ device.name }}
+                  </option>
+                  <option value="__custom__">✏️ Enter Custom Name...</option>
+                </select>
+              </div>
+              <input 
+                v-if="settingsForm.device === '__custom__'" 
+                type="text" 
+                v-model="customDeviceName" 
+                placeholder="Enter camera device name"
+                @blur="settingsForm.device = customDeviceName"
+                style="margin-top: 8px;"
+              />
+              <small v-if="availableDevices.videoDevices.length === 0" style="color: #999;">
+                📡 Click "🔄 Refresh Devices" to scan or enter custom name.
+              </small>
+            </div>
+            <div class="setting-item">
+              <label>Resolution:</label>
+              <input type="text" v-model="settingsForm.res" placeholder="e.g., 1920x1080" />
+            </div>
+            <div class="setting-item">
+              <label>FPS:</label>
+              <input type="number" v-model.number="settingsForm.fps" placeholder="e.g., 30" />
+            </div>
+            <div class="setting-item">
+              <label>Stream Port:</label>
+              <input type="number" v-model.number="settingsForm.stream_port" placeholder="e.g., 8010" />
+            </div>
+            <div class="setting-note">
+              <small>⚠️ App will restart after saving to apply changes.</small>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="dialog-btn" @click="refreshDevices()">🔄 Refresh Devices</button>
+            <button class="dialog-btn" @click="saveSettings()">Save & Restart</button>
             <button class="dialog-btn" @click="setDialog()">Cancel</button>
           </div>
         </div>

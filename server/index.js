@@ -1,5 +1,6 @@
 const path = require('path');
 const url = require('url');
+const fs = require('fs');
 
 const config = require("./config.json");
 
@@ -12,6 +13,7 @@ const KoaStaic = require('koa-static');
 
 const { startSerial } = require('./serial.js');
 const { startMJPGStreamer } = require('./mjpg-streamer.js');
+const { listSerialPorts, listVideoDevices } = require('./device-detector.js');
 
 
 async function start() {
@@ -46,7 +48,46 @@ async function start() {
 
     app.use(async function router(ctx) {
       if (ctx.path === '/api/config') {
-        ctx.body = config;
+        if (ctx.method === 'GET') {
+          ctx.body = config;
+        } else if (ctx.method === 'POST') {
+          // Lưu config mới
+          let body = '';
+          ctx.req.on('data', chunk => body += chunk);
+          await new Promise(resolve => ctx.req.on('end', resolve));
+          
+          try {
+            const newConfig = JSON.parse(body);
+            const configPath = path.join(__dirname, 'config.json');
+            fs.writeFileSync(configPath, JSON.stringify(newConfig, null, 2));
+            
+            ctx.body = { success: true, message: 'Config saved. Restarting...' };
+            
+            // Restart app sau 1 giây
+            setTimeout(() => {
+              process.exit(0);
+            }, 1000);
+          } catch (e) {
+            ctx.status = 400;
+            ctx.body = { success: false, message: e.message };
+          }
+        }
+      } else if (ctx.path === '/api/devices') {
+        // API để list devices (serial ports và cameras)
+        try {
+          const [serialPorts, videoDevices] = await Promise.all([
+            listSerialPorts(),
+            listVideoDevices()
+          ]);
+          
+          ctx.body = {
+            serialPorts: serialPorts,
+            videoDevices: videoDevices
+          };
+        } catch (e) {
+          ctx.status = 500;
+          ctx.body = { error: e.message };
+        }
       }
     });
 

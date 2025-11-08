@@ -14,6 +14,19 @@ new Vue({
     mouseMoveSlice: [0, 0],
     activeDialog: '',
     pasteContent: '',
+    settingsForm: {
+      serialport: '',
+      device: '',
+      res: '',
+      fps: 30,
+      stream_port: 8010
+    },
+    currentConfig: null,
+    availableDevices: {
+      serialPorts: [],
+      videoDevices: []
+    },
+    customDeviceName: ''
   },
   mounted() {
     this.init();
@@ -24,6 +37,14 @@ new Vue({
       try {
         const config = await this.fetchConfig();
         console.log('Config loaded:', config);
+        
+        this.currentConfig = config;
+        // Populate settings form với giá trị hiện tại
+        this.settingsForm.serialport = config.serialport;
+        this.settingsForm.device = config.mjpg_streamer.device;
+        this.settingsForm.res = config.mjpg_streamer.res;
+        this.settingsForm.fps = config.mjpg_streamer.fps;
+        this.settingsForm.stream_port = config.mjpg_streamer.stream_port;
         
         document.title = config.app_title;
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
@@ -181,9 +202,71 @@ new Vue({
         this.setPointerLock(false);
         this.setScreenFocus(false);
         this.activeDialog = name;
+        
+        // Khi mở settings, load danh sách devices
+        if (name === 'settings') {
+          this.loadAvailableDevices();
+        }
       } else {
         this.activeDialog = '';
       }
     },
+    async loadAvailableDevices() {
+      try {
+        console.log('Loading available devices...');
+        const response = await fetch('/api/devices');
+        const devices = await response.json();
+        console.log('Available devices:', devices);
+        
+        this.availableDevices.serialPorts = devices.serialPorts || [];
+        this.availableDevices.videoDevices = devices.videoDevices || [];
+      } catch (e) {
+        console.error('Error loading devices:', e);
+      }
+    },
+    async refreshDevices() {
+      await this.loadAvailableDevices();
+      alert('Devices list refreshed!');
+    },
+    async saveSettings() {
+      try {
+        const newConfig = {
+          ...this.currentConfig,
+          serialport: this.settingsForm.serialport,
+          mjpg_streamer: {
+            device: this.settingsForm.device,
+            res: this.settingsForm.res,
+            fps: this.settingsForm.fps,
+            stream_port: this.settingsForm.stream_port
+          }
+        };
+        
+        console.log('Saving config:', newConfig);
+        
+        const response = await fetch('/api/config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newConfig)
+        });
+        
+        const result = await response.json();
+        console.log('Save result:', result);
+        
+        if (result.success) {
+          alert('Settings saved! App will restart now...');
+          // Đợi server restart rồi reload trang
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          alert('Error saving settings: ' + result.message);
+        }
+      } catch (e) {
+        console.error('Error saving settings:', e);
+        alert('Error saving settings: ' + e.message);
+      }
+    }
   },
 });
