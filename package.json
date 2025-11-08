@@ -2,11 +2,32 @@
   "name": "open-ip-kvm",
   "version": "1.0.0",
   "description": "Build your own open-source ip-kvm device",
-  "main": "index.js",
+  "main": "electron-main.js",
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
+    "electron": "electron .",
+    "electron-dev": "set NODE_ENV=development && electron .",
+    "build": "electron-builder --win --x64",
     "mjpg": "bash start-mjpg-streamer.sh"
+  },
+  "build": {
+    "appId": "com.openipkvm.app",
+    "productName": "Open IP-KVM",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron-main.js",
+      "server/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    }
   },
   "author": "Nihiue",
   "license": "MIT",
@@ -17,6 +38,8 @@
     "ws": "^8.10.0"
   },
   "devDependencies": {
+    "electron": "^25.9.8",
+    "electron-builder": "^24.6.4",
     "nodemon": "^3.1.10"
   }
 }
