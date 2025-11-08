@@ -1,9 +1,9 @@
 {
   "app_title": "Open IP-KVM",
   "listen_port": 8000,
-  "serialport": "/dev/ttyUSB0",
+  "serialport": "COM3",
   "mjpg_streamer": {
-    "device": "/dev/video0",
+    "device": "\"Redmi Note 9 Pro (Windows Virtual Camera)\"",
     "res": "1920x1080",
     "fps": 30,
     "stream_port": 8010

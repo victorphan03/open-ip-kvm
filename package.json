@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
     "mjpg": "bash start-mjpg-streamer.sh"
   },
   "author": "Nihiue",
@@ -14,5 +15,8 @@
     "koa-static": "^5.0.0",
     "serialport": "^10.4.0",
     "ws": "^8.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
