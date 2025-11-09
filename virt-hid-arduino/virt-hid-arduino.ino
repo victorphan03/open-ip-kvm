@@ -40,7 +40,7 @@ void setup() {
   Keyboard.begin();
   Mouse.begin();
 
-  Serial1.begin(19200);
+  Serial1.begin(115200);
 }
 
 void parse_r_buf() {

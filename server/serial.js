@@ -14,7 +14,7 @@ module.exports.startSerial = function(portPath) {
 
   serialport = new SerialPort({
     path: portPath,
-    baudRate: 19200,
+    baudRate: 115200,
   });
 
   console.log(`serialport ready: ${portPath}`);
