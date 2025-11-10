@@ -52,6 +52,18 @@
             title="Remote Paste (ASCII Only)"
           ></span>
           <span
+            @click="powerToggle(200)"
+            class="button bi-power"
+            title="Power Toggle (Short Press)"
+            style="color: #ffc107;"
+          ></span>
+          <span
+            @click="powerShutdown(5000)"
+            class="button bi-power"
+            title="Force Shutdown (Long Press)"
+            style="color: #dc3545; text-shadow: 2px 0 #000;"
+          ></span>
+          <span
             @click="setDialog('settings')"
             class="button bi-gear"
             title="Settings"

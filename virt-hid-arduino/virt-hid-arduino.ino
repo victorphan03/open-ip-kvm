@@ -4,6 +4,7 @@
 #define KB_EVT_START 248
 #define MOUSE_EVT_START 249
 #define KEY_SEQUENCE_EVT_START 250
+#define POWER_EVT_START 252
 #define EVT_END 251
 
 #define KB_EVT_TYPE_KEYDOWN 1
@@ -21,7 +22,10 @@
 #define MOUSE_EVT_TYPE_RESET 9
 #define MOUSE_EVT_TYPE_CONFIG_MOVE_FACTOR 10
 
+#define POWER_EVT_TYPE_PRESS 1   // Short press (toggle power)
+
 #define R_BUF_LEN 32
+#define POWER_BTN_PIN 4  // Pin 4 for power button (opto-isolator)
 
 bool led = false;
 
@@ -36,6 +40,10 @@ void blink() {
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
+  
+  // Power button pin
+  pinMode(POWER_BTN_PIN, OUTPUT);
+  digitalWrite(POWER_BTN_PIN, LOW);
 
   Keyboard.begin();
   Mouse.begin();
@@ -100,11 +108,32 @@ void parse_r_buf() {
           Keyboard.write(rBuf[i]);
       }
   }
+
+  if (rBuf[0] == POWER_EVT_START && rBufCursor >= 3) {
+    // Power event: [252, type, duration_low, duration_high, 251]
+    switch (rBuf[1]) {
+      case POWER_EVT_TYPE_PRESS: {
+        // Duration = rBuf[2] | (rBuf[3] << 8) if needed, else just rBuf[2]
+        int durationMs = rBuf[2];  // 0-255ms
+        powerButtonPress(durationMs);
+        break;
+      }
+      default:
+        break;
+    }
+  }
 }
 
 void reset_r_buf() {
    rBufCursor = 0;
    rBuf[0] = 0;
+}
+
+// Power button control
+void powerButtonPress(int durationMs) {
+  digitalWrite(POWER_BTN_PIN, HIGH);
+  delay(durationMs);
+  digitalWrite(POWER_BTN_PIN, LOW);
 }
 
 void loop() {
@@ -118,7 +147,7 @@ void loop() {
       reset_r_buf();
     } else {
       if (rBufCursor == 0) {
-        if (curVal == KB_EVT_START || curVal == MOUSE_EVT_START || curVal == KEY_SEQUENCE_EVT_START) {
+        if (curVal == KB_EVT_START || curVal == MOUSE_EVT_START || curVal == KEY_SEQUENCE_EVT_START || curVal == POWER_EVT_START) {
           rBuf[rBufCursor] = curVal;
           rBufCursor += 1;
         }

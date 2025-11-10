@@ -272,6 +272,50 @@ new Vue({
         console.error('Error saving settings:', e);
         alert('Error saving settings: ' + e.message);
       }
+    },
+    // Power Control Functions
+    async powerToggle(duration = 200) {
+      try {
+        console.log('[Power] Toggle (short press, ' + duration + 'ms)');
+        const response = await fetch('/api/power', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'toggle', duration })
+        });
+        const result = await response.json();
+        console.log('[Power] Response:', result);
+        if (result.success) {
+          alert('Power toggled!');
+        } else {
+          alert('Power error: ' + result.error);
+        }
+      } catch (e) {
+        console.error('[Power] Error:', e);
+        alert('Power error: ' + e.message);
+      }
+    },
+    async powerShutdown(duration = 5000) {
+      try {
+        if (!confirm('Force shutdown? (Hold ' + (duration/1000) + 's)')) {
+          return;
+        }
+        console.log('[Power] Shutdown (long press, ' + duration + 'ms)');
+        const response = await fetch('/api/power', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'shutdown', duration })
+        });
+        const result = await response.json();
+        console.log('[Power] Response:', result);
+        if (result.success) {
+          alert('Shutdown signal sent!');
+        } else {
+          alert('Power error: ' + result.error);
+        }
+      } catch (e) {
+        console.error('[Power] Error:', e);
+        alert('Power error: ' + e.message);
+      }
     }
   },
 });
