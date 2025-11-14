@@ -4,7 +4,7 @@
   "description": "Build your own open-source ip-kvm device",
   "main": "electron-main.js",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "export LD_LIBRARY_PATH=/root/open-ip-kvm/mjpg-streamer-experimental && node server/index.js",
     "dev": "nodemon server/index.js",
     "electron": "electron .",
     "electron-dev": "set NODE_ENV=development && electron .",
