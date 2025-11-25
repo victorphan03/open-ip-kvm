@@ -20,7 +20,13 @@ async function start() {
 
   try {
     const writeSerial = startSerial(config.serialport);
-    await startMJPGStreamer(config.mjpg_streamer);
+    
+    try {
+      await startMJPGStreamer(config.mjpg_streamer);
+    } catch (err) {
+      console.error('Failed to start MJPG streamer:', err.message);
+      console.log('Video streaming will be disabled.');
+    }
 
     function websocketHandler(ws) {
       console.log('new websocket connection');

@@ -25,8 +25,18 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "icon.ico"
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico",
+      "signAndEditExecutable": false
     }
   },
   "author": "Nihiue",
