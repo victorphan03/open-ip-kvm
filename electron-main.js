@@ -58,7 +58,7 @@ function createWindow() {
     icon: path.join(__dirname, 'icon.png')
   });
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools(); // Tắt DevTools
 
   // Log to renderer console
   mainWindow.webContents.on('did-finish-load', () => {
