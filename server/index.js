@@ -19,7 +19,7 @@ const { listSerialPorts, listVideoDevices } = require('./device-detector.js');
 async function start() {
 
   try {
-    const writeSerial = startSerial(config.serialport);
+    const writeSerial = await startSerial(config.serialport);
     
     try {
       await startMJPGStreamer(config.mjpg_streamer);
