@@ -50,23 +50,36 @@ new Vue({
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
         console.log('Stream ping result:', streamOk);
         
-        if (!streamOk) {
-          throw new Error(
-            'Video stream is not ready, please check mjpeg process'
-          );
-        }
+        // Vẫn khởi tạo WebSocket và handlers ngay cả khi stream chưa sẵn sàng
         this.$channel = await ws.init(
           `ws://${this.serviceHost}:${config.listen_port}/websocket`
         );
         this.bindKeyHandler();
         this.bindMouseHandler();
 
-        this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
-        console.log('Stream URL:', this.streamSrc);
+        if (streamOk) {
+          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+          console.log('Stream URL:', this.streamSrc);
+        } else {
+          console.warn('Video stream not ready yet. UI will be available for control. Stream will connect when device is available.');
+          // Retry ping stream mỗi 5 giây
+          this.retryStreamConnection(config);
+        }
       } catch (e) {
         console.error('Init error:', e);
         alert(e.toString());
       }
+    },
+    retryStreamConnection(config) {
+      const retryInterval = setInterval(async () => {
+        console.log('Retrying stream connection...');
+        const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
+        if (streamOk && !this.streamSrc) {
+          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+          console.log('Stream connected:', this.streamSrc);
+          clearInterval(retryInterval);
+        }
+      }, 5000);
     },
     async pingStream(port) {
       try {

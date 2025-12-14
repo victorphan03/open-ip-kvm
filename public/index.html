@@ -17,7 +17,16 @@
 
   <body>
     <div id="app">
-      <div v-show="streamSrc" style="display: none">
+      <div style="display: block">
+
+        <div v-if="!streamSrc" class="video-placeholder" style="background:#1a1a1a; min-height:400px; display:flex; align-items:center; justify-content:center; color:#999; text-align:center; padding:40px; border-radius:8px; margin:20px;">
+          <div>
+            <i class="bi bi-camera-video" style="font-size:64px; display:block; margin-bottom:20px; opacity:0.5;"></i>
+            <h3>Waiting for video device...</h3>
+            <p>Video stream will appear when capture device is available.</p>
+            <p style="font-size:14px; margin-top:20px;">💡 You can still use keyboard and mouse controls below</p>
+          </div>
+        </div>
 
         <img
           v-if="streamSrc"
@@ -182,8 +191,6 @@
         </div>
 
       </div>
-
-      <div v-show="!streamSrc" class="loading">Loading...</div>
 
     </div>
 
