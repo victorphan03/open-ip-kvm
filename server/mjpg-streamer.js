@@ -4,6 +4,9 @@ let shell;
 let server;
 let retryTimer;
 let isRetrying = false;
+let startTime;
+let frameCount = 0;
+let healthCheckTimer;
 
 function startMJPGStreamer(opt) {
   if (process.platform === 'win32') {
@@ -50,6 +53,21 @@ function startMJPGStreamer(opt) {
         
         shell = spawn('ffmpeg', ffmpegArgs, { shell: true });
         isRetrying = false;
+        startTime = Date.now();
+        frameCount = 0;
+        
+        // Clear previous health check
+        if (healthCheckTimer) clearTimeout(healthCheckTimer);
+        
+        // Health check: restart nếu không có frame nào sau 30s
+        healthCheckTimer = setTimeout(() => {
+          if (frameCount === 0) {
+            console.warn('[MJPEG] No frames received in 30s, restarting ffmpeg...');
+            if (shell) {
+              try { shell.kill(); } catch (e) {}
+            }
+          }
+        }, 30000);
 
         shell.stderr.on('data', (data) => {
           const str = data.toString('utf-8');
@@ -61,10 +79,15 @@ function startMJPGStreamer(opt) {
         
         shell.on('close', (code) => {
           console.log(`[MJPEG] ffmpeg exited with code ${code}`);
+          if (healthCheckTimer) clearTimeout(healthCheckTimer);
+          
+          const uptime = Date.now() - startTime;
+          const retryDelay = uptime < 5000 ? 3000 : 10000; // Exit sớm (<5s) → retry nhanh (3s), không thì 10s
+          
           if (!isRetrying) {
             isRetrying = true;
-            console.log('[MJPEG] Will retry in 10 seconds...');
-            retryTimer = setTimeout(() => startFFmpegProcess(options), 10000);
+            console.log(`[MJPEG] Will retry in ${retryDelay/1000} seconds... (uptime: ${Math.floor(uptime/1000)}s, frames: ${frameCount})`);
+            retryTimer = setTimeout(() => startFFmpegProcess(options), retryDelay);
           }
         });
 
@@ -86,6 +109,7 @@ function startMJPGStreamer(opt) {
           
           const frame = buffer.slice(jpegStart, jpegEnd + 2);
           lastFrame = frame; // Lưu frame cuối cùng cho snapshot
+          frameCount++; // Đếm frame
           
           // Send frame to all streaming clients with MJPEG boundary
           const frameData = Buffer.concat([
@@ -204,6 +228,9 @@ function startMJPGStreamer(opt) {
       
       shell = spawn('bash', ['-c', cmd]);
       isRetrying = false;
+      startTime = Date.now();
+      
+      if (healthCheckTimer) clearTimeout(healthCheckTimer);
       
       shell.stdout.on('data', (data) => {
         console.log(data.toString('utf-8'));
@@ -226,10 +253,15 @@ function startMJPGStreamer(opt) {
       
       shell.on('close', (code) => {
         console.log(`[MJPEG] mjpg_streamer exited with code ${code}`);
+        if (healthCheckTimer) clearTimeout(healthCheckTimer);
+        
+        const uptime = Date.now() - startTime;
+        const retryDelay = uptime < 5000 ? 3000 : 10000;
+        
         if (!isRetrying) {
           isRetrying = true;
-          console.log('[MJPEG] Will retry in 10 seconds...');
-          retryTimer = setTimeout(() => startMjpgStreamerProcess(options), 10000);
+          console.log(`[MJPEG] Will retry in ${retryDelay/1000} seconds... (uptime: ${Math.floor(uptime/1000)}s)`);
+          retryTimer = setTimeout(() => startMjpgStreamerProcess(options), retryDelay);
         }
       });
     }
