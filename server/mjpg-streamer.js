@@ -211,12 +211,14 @@ function startMJPGStreamer(opt) {
     function startUStreamerProcess(options) {
       if (retryTimer) clearTimeout(retryTimer);
       
-      // µStreamer command - minimal flags cho UVC HDMI capture
+      // µStreamer command với resolution và fps từ config
       const cmd = [
         'ustreamer',
         '--device', options.device || '/dev/video0',
         '--host', '0.0.0.0',
         '--port', options.stream_port || 8090,
+        '--resolution', options.res || '1920x1080',
+        '--desired-fps', options.fps || 30,
         '--format', 'MJPEG',
         '--quality', '80',
         '--allow-origin', "'*'",
