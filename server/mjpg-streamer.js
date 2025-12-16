@@ -137,7 +137,7 @@ function startMJPGStreamer(opt) {
         const url = new URL(req.url, `http://${req.headers.host}`);
         
         // Thêm CORS headers
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Origin', "'*'");
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         
@@ -219,7 +219,7 @@ function startMJPGStreamer(opt) {
         '--port', options.stream_port || 8090,
         '--format', 'MJPEG',
         '--quality', '80',
-        '--allow-origin', '*',
+        '--allow-origin', "'*'",
         '--persistent',
       ].join(' ');
       
