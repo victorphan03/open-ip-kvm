@@ -201,7 +201,7 @@ function startMJPGStreamer(opt) {
       });
     });
   }
-  // Linux: original mjpg_streamer with retry
+  // Linux: µStreamer with retry
   if (shell) {
     return Promise.resolve();
   }
@@ -209,18 +209,23 @@ function startMJPGStreamer(opt) {
   return new Promise((resolve, reject) => {
     let resolved = false;
     
-    function startMjpgStreamerProcess(options) {
+    function startUStreamerProcess(options) {
       if (retryTimer) clearTimeout(retryTimer);
       
+      // µStreamer command
       const cmd = [
-        'mjpg_streamer',
-        '-i',
-        `'input_uvc.so -d ${options.device} -r ${options.res} -f ${options.fps} -n'`,
-        '-o',
-        `'output_http.so -p ${options.stream_port} -n'`,
+        'ustreamer',
+        '--device', options.device || '/dev/video0',
+        '--host', '0.0.0.0',
+        '--port', options.stream_port || 8090,
+        '--resolution', options.res || '1280x720',
+        '--desired-fps', options.fps || 30,
+        '--format', 'MJPEG',
+        '--quality', '80',
+        '--allow-origin', '*',  // CORS
       ].join(' ');
       
-      console.log('[Linux] Starting mjpg_streamer:', cmd);
+      console.log('[Linux] Starting µStreamer:', cmd);
       
       if (shell) {
         try { shell.kill(); } catch (e) {}
@@ -233,26 +238,37 @@ function startMJPGStreamer(opt) {
       if (healthCheckTimer) clearTimeout(healthCheckTimer);
       
       shell.stdout.on('data', (data) => {
-        console.log(data.toString('utf-8'));
-      });
-      
-      shell.stderr.on('data', (data) => {
         const str = data.toString('utf-8');
         console.log(str);
-        if (str.indexOf('HTTP TCP port') > -1) {
-          console.log('[MJPEG] mjpg_streamer started successfully');
+        
+        // µStreamer logs "Listening HTTP on" khi ready
+        if (str.includes('Listening HTTP on') || str.includes('HTTP: Listening')) {
+          console.log('[MJPEG] µStreamer started successfully');
           if (!resolved) {
             resolved = true;
             resolve();
           }
         }
-        if (str.includes('ERROR') || str.includes('error')) {
-          console.warn('[MJPEG] Device not available, will retry in 10s...');
+      });
+      
+      shell.stderr.on('data', (data) => {
+        const str = data.toString('utf-8');
+        console.log(str);
+        
+        if (str.includes('Listening HTTP on') || str.includes('HTTP: Listening')) {
+          console.log('[MJPEG] µStreamer started successfully');
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        }
+        if (str.includes('ERROR') || str.includes('error') || str.includes('Can\'t open device')) {
+          console.warn('[MJPEG] Device not available, will retry...');
         }
       });
       
       shell.on('close', (code) => {
-        console.log(`[MJPEG] mjpg_streamer exited with code ${code}`);
+        console.log(`[MJPEG] µStreamer exited with code ${code}`);
         if (healthCheckTimer) clearTimeout(healthCheckTimer);
         
         const uptime = Date.now() - startTime;
@@ -261,13 +277,13 @@ function startMJPGStreamer(opt) {
         if (!isRetrying) {
           isRetrying = true;
           console.log(`[MJPEG] Will retry in ${retryDelay/1000} seconds... (uptime: ${Math.floor(uptime/1000)}s)`);
-          retryTimer = setTimeout(() => startMjpgStreamerProcess(options), retryDelay);
+          retryTimer = setTimeout(() => startUStreamerProcess(options), retryDelay);
         }
       });
     }
     
     // Start process và resolve ngay sau 2s nếu chưa có tín hiệu thành công
-    startMjpgStreamerProcess(opt);
+    startUStreamerProcess(opt);
     setTimeout(() => {
       if (!resolved) {
         console.log('[MJPEG] Starting in background, will connect when device is ready');
