@@ -21,6 +21,7 @@ function startMJPGStreamer(opt) {
     return new Promise((resolve, reject) => {
       const port = opt.stream_port || 8090;
       let clients = [];
+      let lastFrame = null; // Di chuyển ra ngoài để HTTP handler access được
 
       function startFFmpegProcess(options) {
         if (retryTimer) clearTimeout(retryTimer);
@@ -93,7 +94,6 @@ function startMJPGStreamer(opt) {
 
         // Parse JPEG frames and send with MJPEG boundaries
         let buffer = Buffer.alloc(0);
-        let lastFrame = null;
         
         shell.stdout.on('data', (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
