@@ -58,7 +58,7 @@ new Vue({
         this.bindMouseHandler();
 
         if (streamOk) {
-          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/stream`;
           console.log('Stream URL:', this.streamSrc);
         } else {
           console.warn('Video stream not ready yet. UI will be available for control. Stream will connect when device is available.');
@@ -75,7 +75,7 @@ new Vue({
         console.log('Retrying stream connection...');
         const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
         if (streamOk && !this.streamSrc) {
-          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+          this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/stream`;
           console.log('Stream connected:', this.streamSrc);
           clearInterval(retryInterval);
         }
@@ -83,7 +83,7 @@ new Vue({
     },
     async pingStream(port) {
       try {
-        const url = `http://${this.serviceHost}:${port}/?action=snapshot`;
+        const url = `http://${this.serviceHost}:${port}/snapshot`;
         console.log('Pinging stream at:', url);
         const pingRes = await fetch(url);
         console.log('Ping response status:', pingRes.status);

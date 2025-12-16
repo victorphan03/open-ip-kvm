@@ -132,10 +132,9 @@ function startMJPGStreamer(opt) {
         });
       }
 
-      // HTTP MJPEG server - hỗ trợ cả / và /?action=stream và /?action=snapshot
+      // HTTP MJPEG server - hỗ trợ /stream và /snapshot
       server = http.createServer((req, res) => {
         const url = new URL(req.url, `http://${req.headers.host}`);
-        const action = url.searchParams.get('action');
         
         // Thêm CORS headers
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -149,10 +148,10 @@ function startMJPGStreamer(opt) {
           return;
         }
         
-        console.log(`[HTTP] Request: ${req.url}, action=${action}`);
+        console.log(`[HTTP] Request: ${url.pathname}`);
         
-        if (action === 'snapshot') {
-          // Chỉ trả về 1 frame JPEG (giống mjpg-streamer trên Linux)
+        if (url.pathname === '/snapshot') {
+          // Chỉ trả về 1 frame JPEG
           console.log('[HTTP] Serving snapshot');
           if (lastFrame) {
             res.writeHead(200, {
@@ -162,14 +161,14 @@ function startMJPGStreamer(opt) {
             });
             res.end(lastFrame);
           } else {
-            // Nếu chưa có frame, trả về placeholder hoặc chờ frame đầu tiên
+            // Nếu chưa có frame, trả về placeholder
             res.writeHead(200, { 
               'Content-Type': 'text/plain',
               'Cache-Control': 'no-cache'
             });
             res.end('Waiting for first frame...');
           }
-        } else if (url.pathname === '/' || action === 'stream') {
+        } else if (url.pathname === '/' || url.pathname === '/stream') {
           // Stream liên tục
           console.log('[HTTP] Serving stream');
           res.writeHead(200, {
